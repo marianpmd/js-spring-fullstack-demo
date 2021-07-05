@@ -1,8 +1,6 @@
 package com.marian.j16rest_demo.users.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;

@@ -9,6 +9,16 @@ const putDiv = document.getElementById("putDiv");
 const putButton = document.getElementById("putButton");
 const nameInput = document.getElementById("name");
 const addressInput = document.getElementById("address");
+const putTextDiv = document.getElementById("putTextDiv");
+
+class Roles {
+    constructor(name,salary) {
+        this.name = name;
+        this.salary = salary;
+    }
+
+
+}
 
 const person = {
     name:"Morris",
@@ -50,12 +60,28 @@ async function fetchData(method){
             });
 
         case "PUT":
+            let nameInputs = document.getElementsByClassName("--roles");
+            let salaryInputs = document.getElementsByClassName("--salaries");
+
+            let roles = [];
+            for (let i = 0; i < nameInputs.length; i++) {
+                roles.push(new Roles(nameInputs[i].value , salaryInputs[i].value));
+            }
+
             const personPut = {
                 name : nameInput.value,
                 address: addressInput.value,
-
-
+                roles : roles
             }
+
+            return await fetch("http://localhost/put", {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(personPut)
+            });
 
 
     }
@@ -101,28 +127,32 @@ addRoleButton.addEventListener("click",event=>{
    }
     roleInput.placeholder="NAME";
     salaryInput.placeholder="SALARY";
-    salaryInput.className="--salaries";
-    roleInput.className = "--roles";
+    salaryInput.classList.add("--role","--salaries");
+    roleInput.classList.add("--role","--roles");
+
    putDiv.appendChild(roleInput);
-   putDiv.appendChild(salaryInput)
+   putDiv.appendChild(salaryInput);
    putDiv.appendChild(document.createElement("br"));
 
 
-   let elementsByClassName = document.getElementsByClassName("--roles");
+   let elementsByClassName = document.getElementsByClassName("--role");
     for (const elem of elementsByClassName) {
         console.log(elem);
     }
 });
 
 putButton.addEventListener('click',async (event) => {
-    const json = await fetchData('PUT');
-    let text = document.createElement("text");
-    text.style.backgroundColor = "#2e2e31";
-    text.style.borderRadius = "8px";
-    text.style.fontSize = "70%";
-    text.textContent = ` ${JSON.stringify(json)} `;
-    putDiv.appendChild(text);
+    putTextDiv.childNodes.forEach(child=>{
+        putTextDiv.removeChild(child);
+    })
+    const body = await fetchData('PUT');
+    const text = await body.text();
+    console.log(text);
 
+    let htmlElement = document.createElement("text");
+    htmlElement.textContent = text;
+
+    putTextDiv.appendChild(htmlElement);
 
 
 });

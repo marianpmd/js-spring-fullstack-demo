@@ -1,7 +1,9 @@
 package com.marian.j16rest_demo.users.service;
 
+
 import com.marian.j16rest_demo.users.DTO.PersonDTO;
 import com.marian.j16rest_demo.users.DTO.RoleDTO;
+import com.marian.j16rest_demo.users.controller.PersonNotFoundException;
 import com.marian.j16rest_demo.users.entity.PersonEntity;
 import com.marian.j16rest_demo.users.entity.RolesEntity;
 import com.marian.j16rest_demo.users.repository.PersonsRepository;
@@ -10,9 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,5 +57,25 @@ public class PersonsService {
         });
         rolesRepository.saveAll(collect);
         personsRepository.save(personEntity);
+    }
+
+   @Transactional
+    public PersonDTO putPerson(PersonDTO personDTO) {
+        PersonEntity personEntity = personsRepository.findByName(personDTO.name())
+                .orElseThrow(()->new PersonNotFoundException("Person not found!"));
+
+        List<RolesEntity> entities = personDTO.roles().stream()
+                .map(dtoRole -> new RolesEntity(dtoRole.name(), dtoRole.salary()))
+                .peek(rolesEntity -> rolesEntity.setPerson(personEntity))
+                .collect(Collectors.toList());
+
+        rolesRepository.saveAll(entities);
+
+        personEntity.setRoles(entities);
+        personEntity.setAddress(personDTO.address());
+        personsRepository.save(personEntity);
+
+        return  personDTO;
+
     }
 }
